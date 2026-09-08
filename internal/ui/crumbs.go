@@ -17,13 +17,12 @@ type Crumbs struct {
 	*tview.TextView
 
 	styles *config.Styles
-	stack  *model.Stack
+	crumbs []string
 }
 
 // NewCrumbs returns a new breadcrumb view.
 func NewCrumbs(styles *config.Styles) *Crumbs {
 	c := Crumbs{
-		stack:    model.NewStack(),
 		styles:   styles,
 		TextView: tview.NewTextView(),
 	}
@@ -40,23 +39,34 @@ func NewCrumbs(styles *config.Styles) *Crumbs {
 func (c *Crumbs) StylesChanged(s *config.Styles) {
 	c.styles = s
 	c.SetBackgroundColor(s.BgColor())
-	c.refresh(c.stack.Flatten())
+	c.refresh(c.crumbs)
 }
 
 // StackPushed indicates a new item was added.
 func (c *Crumbs) StackPushed(comp model.Component) {
-	c.stack.Push(comp)
-	c.refresh(c.stack.Flatten())
+	c.crumbs = append(c.crumbs, comp.Name())
+	c.refresh(c.crumbs)
 }
 
 // StackPopped indicates an item was deleted.
 func (c *Crumbs) StackPopped(_, _ model.Component) {
-	c.stack.Pop()
-	c.refresh(c.stack.Flatten())
+	if len(c.crumbs) > 0 {
+		c.crumbs = c.crumbs[:len(c.crumbs)-1]
+	}
+	c.refresh(c.crumbs)
 }
 
 // StackTop indicates the top of the stack.
 func (*Crumbs) StackTop(model.Component) {}
+
+// Reset rebuilds the breadcrumbs from a set of components.
+func (c *Crumbs) Reset(cc []model.Component) {
+	c.crumbs = c.crumbs[:0]
+	for _, comp := range cc {
+		c.crumbs = append(c.crumbs, comp.Name())
+	}
+	c.refresh(c.crumbs)
+}
 
 // Refresh updates view with new crumbs.
 func (c *Crumbs) refresh(crumbs []string) {

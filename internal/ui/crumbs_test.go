@@ -31,6 +31,18 @@ func TestNewCrumbs(t *testing.T) {
 	assert.Equal(t, "[#000000:#00ffff:b] <c1> [-:#000000:-] [#000000:#00ffff:b] <c2> [-:#000000:-] [#000000:#ffa500:b] <c3> [-:#000000:-] \n", v.GetText(false))
 }
 
+func TestCrumbsReset(t *testing.T) {
+	v := ui.NewCrumbs(config.NewStyles())
+	v.StackPushed(makeComponent("c1"))
+	v.StackPushed(makeComponent("c2"))
+
+	v.Reset([]model.Component{makeComponent("x1"), makeComponent("x2"), makeComponent("x3")})
+	assert.Equal(t, "[#000000:#00ffff:b] <x1> [-:#000000:-] [#000000:#00ffff:b] <x2> [-:#000000:-] [#000000:#ffa500:b] <x3> [-:#000000:-] \n", v.GetText(false))
+
+	v.Reset(nil)
+	assert.Empty(t, v.GetText(false))
+}
+
 // Helpers...
 
 type c struct {

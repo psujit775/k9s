@@ -18,6 +18,7 @@ func initKeys() {
 	initStdKeys()
 	initShiftKeys()
 	initShiftNumKeys()
+	initAltNumKeys()
 }
 
 // Defines numeric keys for container actions.
@@ -46,6 +47,20 @@ const (
 	KeyShift7 tcell.Key = 38
 	KeyShift8 tcell.Key = 42
 	KeyShift9 tcell.Key = 40
+)
+
+// Defines alt+numeric keys for tab navigation.
+const (
+	KeyAlt0 tcell.Key = tcell.Key(int16('0') * int16(tcell.ModAlt))
+	KeyAlt1 tcell.Key = tcell.Key(int16('1') * int16(tcell.ModAlt))
+	KeyAlt2 tcell.Key = tcell.Key(int16('2') * int16(tcell.ModAlt))
+	KeyAlt3 tcell.Key = tcell.Key(int16('3') * int16(tcell.ModAlt))
+	KeyAlt4 tcell.Key = tcell.Key(int16('4') * int16(tcell.ModAlt))
+	KeyAlt5 tcell.Key = tcell.Key(int16('5') * int16(tcell.ModAlt))
+	KeyAlt6 tcell.Key = tcell.Key(int16('6') * int16(tcell.ModAlt))
+	KeyAlt7 tcell.Key = tcell.Key(int16('7') * int16(tcell.ModAlt))
+	KeyAlt8 tcell.Key = tcell.Key(int16('8') * int16(tcell.ModAlt))
+	KeyAlt9 tcell.Key = tcell.Key(int16('9') * int16(tcell.ModAlt))
 )
 
 // Defines char keystrokes.
@@ -115,6 +130,20 @@ const (
 	KeyShiftZ
 )
 
+// AltNumKeys tracks alt+number keys.
+var AltNumKeys = map[int]tcell.Key{
+	0: KeyAlt0,
+	1: KeyAlt1,
+	2: KeyAlt2,
+	3: KeyAlt3,
+	4: KeyAlt4,
+	5: KeyAlt5,
+	6: KeyAlt6,
+	7: KeyAlt7,
+	8: KeyAlt8,
+	9: KeyAlt9,
+}
+
 // NumKeys tracks number keys.
 var NumKeys = map[int]tcell.Key{
 	0: Key0,
@@ -169,6 +198,19 @@ func initStdKeys() {
 	tcell.KeyNames[KeyX] = "x"
 	tcell.KeyNames[KeyY] = "y"
 	tcell.KeyNames[KeyZ] = "z"
+}
+
+func initAltNumKeys() {
+	tcell.KeyNames[KeyAlt0] = "Alt-0"
+	tcell.KeyNames[KeyAlt1] = "Alt-1"
+	tcell.KeyNames[KeyAlt2] = "Alt-2"
+	tcell.KeyNames[KeyAlt3] = "Alt-3"
+	tcell.KeyNames[KeyAlt4] = "Alt-4"
+	tcell.KeyNames[KeyAlt5] = "Alt-5"
+	tcell.KeyNames[KeyAlt6] = "Alt-6"
+	tcell.KeyNames[KeyAlt7] = "Alt-7"
+	tcell.KeyNames[KeyAlt8] = "Alt-8"
+	tcell.KeyNames[KeyAlt9] = "Alt-9"
 }
 
 func initShiftNumKeys() {
