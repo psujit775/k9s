@@ -279,6 +279,26 @@ func (*Help) showGeneral() model.MenuHints {
 			Description: "Toggle Crumbs",
 		},
 		{
+			Mnemonic:    "Ctrl-t",
+			Description: "New Tab",
+		},
+		{
+			Mnemonic:    "Ctrl-x",
+			Description: "Close Tab",
+		},
+		{
+			Mnemonic:    "Ctrl-n",
+			Description: "Next Tab",
+		},
+		{
+			Mnemonic:    "Ctrl-o",
+			Description: "Prev Tab",
+		},
+		{
+			Mnemonic:    "Alt-1..9",
+			Description: "Jump to Tab",
+		},
+		{
 			Mnemonic:    ":q",
 			Description: "Quit",
 		},

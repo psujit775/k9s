@@ -46,6 +46,7 @@ type App struct {
 	version string
 	*ui.App
 	Content       *PageStack
+	tabs          *Tabs
 	command       *Command
 	factory       *watch.Factory
 	cancelFn      context.CancelFunc
@@ -70,6 +71,7 @@ func NewApp(cfg *config.Config) *App {
 
 	a.Views()["statusIndicator"] = ui.NewStatusIndicator(a.App, a.Styles)
 	a.Views()["clusterInfo"] = NewClusterInfo(&a)
+	a.tabs = NewTabs(&a)
 
 	return &a
 }
@@ -96,11 +98,9 @@ func (a *App) Init(version string, _ int) error {
 	a.version = model.NormalizeVersion(version)
 
 	ctx := context.WithValue(context.Background(), internal.KeyApp, a)
-	if err := a.Content.Init(ctx); err != nil {
+	if err := a.tabs.Init(ctx); err != nil {
 		return err
 	}
-	a.Content.AddListener(a.Crumbs())
-	a.Content.AddListener(a.Menu())
 
 	a.App.Init()
 	a.SetInputCapture(a.keyboard)
@@ -169,7 +169,7 @@ func (a *App) layout(ctx context.Context) {
 
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
 	main.AddItem(a.statusIndicator(), 1, 1, false)
-	main.AddItem(a.Content, 0, 10, true)
+	main.AddItem(a.tabs, 0, 10, true)
 	if !a.Config.K9s.IsCrumbsless() {
 		main.AddItem(a.Crumbs(), 1, 1, false)
 	}
@@ -262,7 +262,31 @@ func (a *App) bindKeys() {
 		tcell.KeyCtrlA:     ui.NewSharedKeyAction("Aliases", a.aliasCmd, false),
 		tcell.KeyEnter:     ui.NewKeyAction("Goto", a.gotoCmd, false),
 		tcell.KeyCtrlC:     ui.NewKeyAction("Quit", a.quitCmd, false),
+		tcell.KeyCtrlT:     ui.NewSharedKeyAction("New Tab", a.tabActionCmd(a.tabs.AddAndPrompt), false),
+		tcell.KeyCtrlX:     ui.NewSharedKeyAction("Close Tab", a.tabActionCmd(a.tabs.CloseCurrent), false),
+		tcell.KeyCtrlN:     ui.NewSharedKeyAction("Next Tab", a.tabActionCmd(a.tabs.Next), false),
+		tcell.KeyCtrlO:     ui.NewSharedKeyAction("Prev Tab", a.tabActionCmd(a.tabs.Prev), false),
 	}))
+
+	tabJumps := ui.NewKeyActions()
+	for n := 1; n <= maxTabs; n++ {
+		tabJumps.Add(ui.AltNumKeys[n], ui.NewSharedKeyAction(
+			fmt.Sprintf("Tab %d", n), a.tabActionCmd(func() { a.tabs.Jump(n) }), false),
+		)
+	}
+	a.AddActions(tabJumps)
+}
+
+// tabActionCmd wraps a tab operation as a key handler.
+func (a *App) tabActionCmd(fn func()) ui.ActionHandler {
+	return func(evt *tcell.EventKey) *tcell.EventKey {
+		if a.Prompt().InCmdMode() {
+			return evt
+		}
+		a.QueueUpdateDraw(fn)
+
+		return nil
+	}
 }
 
 // ActiveView returns the currently active view.
@@ -467,6 +491,9 @@ func (a *App) switchContext(ci *cmd.Interpreter, force bool) error {
 	a.Halt()
 	defer a.Resume()
 	{
+		// Extra tabs hold views bound to the outgoing context's factory.
+		a.tabs.ResetToActive()
+
 		a.Config.Reset()
 		ct, err := a.Config.ActivateContext(contextName)
 		if err != nil {

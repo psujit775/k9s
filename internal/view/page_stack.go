@@ -54,3 +54,10 @@ func (p *PageStack) StackTop(top model.Component) {
 	top.Start()
 	p.app.SetFocus(top)
 }
+
+// Dispose stops every view in the stack and empties it, skipping the Start()
+// cascade Clear() triggers. Use when discarding a tab.
+func (p *PageStack) Dispose() {
+	p.RemoveListener(p)
+	p.Clear()
+}

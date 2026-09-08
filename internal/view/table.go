@@ -74,6 +74,11 @@ func (t *Table) SetCommand(i *cmd.Interpreter) {
 	t.command = i
 }
 
+// GetCommand returns the current command.
+func (t *Table) GetCommand() *cmd.Interpreter {
+	return t.command
+}
+
 var stripHeaderRX = regexp.MustCompile(`\[.+\](\w+)\[.+\]`)
 
 // HeaderIndex returns index of a given column or false if not found.
